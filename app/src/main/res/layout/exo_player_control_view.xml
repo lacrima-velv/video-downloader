@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--    xmlns:tools="http://schemas.android.com/tools"-->
+<!--    android:id="@+id/my_exo_controls"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="wrap_content"-->
+<!--    android:layout_gravity="bottom"-->
+<!--    android:background="#CC000000"-->
+<!--    android:paddingStart="8dp"-->
+<!--    android:paddingEnd="8dp"-->
+<!--    tools:targetApi="28">-->
+
+<FrameLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:layout_constraintDimensionRatio="16:9"
+    android:layout_gravity="bottom"
+    android:background="#CC000000"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/appbar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@color/nav_and_status_bar_scrim"
+                android:fitsSystemWindows="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                        <com.google.android.material.appbar.MaterialToolbar
+                            android:id="@+id/toolbar_fullscreen"
+                            style="@style/Widget.MaterialComponents.Toolbar.Primary"
+                            android:layout_width="match_parent"
+                            android:layout_height="?attr/actionBarSize"
+                            android:background="@color/transparent"
+                            android:visibility="gone"
+                            app:navigationIcon="@drawable/ic_baseline_keyboard_backspace_24"
+                            app:title="Video"
+                            tools:visibility="visible"/>
+
+            </com.google.android.material.appbar.AppBarLayout>
+
+            <ImageButton
+                android:id="@id/exo_rew"
+                style="@style/ExoMediaButton.Rewind"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:paddingTop="4dp"
+                android:tintMode="src_in"
+                app:layout_constraintBottom_toTopOf="@id/exo_progress"
+                app:layout_constraintEnd_toStartOf="@id/exo_play"
+                app:layout_constraintStart_toStartOf="parent"
+                app:tint="@color/gray" />
+
+            <ImageButton
+                android:id="@id/exo_play"
+                style="@style/ExoMediaButton.Play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:paddingTop="4dp"
+                android:tintMode="src_in"
+                app:layout_constraintBottom_toTopOf="@id/exo_progress"
+                app:layout_constraintEnd_toStartOf="@id/exo_pause"
+                app:layout_constraintStart_toEndOf="@id/exo_rew"
+                app:played_color="@color/design_default_color_primary_dark" />
+
+            <ImageButton
+                android:id="@id/exo_pause"
+                style="@style/ExoMediaButton.Pause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:paddingTop="4dp"
+                android:tintMode="src_in"
+                app:layout_constraintBottom_toTopOf="@id/exo_progress"
+                app:layout_constraintEnd_toStartOf="@id/exo_ffwd"
+                app:layout_constraintStart_toEndOf="@id/exo_play"
+                app:played_color="@color/design_default_color_primary_dark" />
+
+            <ImageButton
+                android:id="@id/exo_ffwd"
+                style="@style/ExoMediaButton.FastForward"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:paddingTop="4dp"
+                android:tintMode="src_in"
+                app:layout_constraintBottom_toTopOf="@id/exo_progress"
+                app:layout_constraintEnd_toStartOf="@id/exo_fullscreen_frame"
+                app:layout_constraintStart_toEndOf="@id/exo_pause"
+                app:played_color="@color/design_default_color_primary_dark" />
+
+            <TextView
+                android:id="@id/exo_position"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:paddingLeft="16dp"
+                android:paddingRight="4dp"
+                android:textColor="@color/gray"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/exo_progress"
+                app:layout_constraintEnd_toStartOf="@id/exo_progress"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/exo_progress"
+                tools:text="00:07" />
+
+            <com.google.android.exoplayer2.ui.DefaultTimeBar
+                android:id="@id/exo_progress"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/exo_duration"
+                app:layout_constraintStart_toEndOf="@id/exo_position"
+                app:played_color="@color/dark_gray"
+                app:unplayed_color="@color/gray" />
+
+            <TextView
+                android:id="@id/exo_duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:paddingLeft="4dp"
+                android:paddingRight="16dp"
+                android:textColor="@color/gray"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/exo_progress"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/exo_progress"
+                app:layout_constraintTop_toTopOf="@id/exo_progress"
+                tools:text="01:25" />
+
+            <FrameLayout
+                android:id="@+id/exo_fullscreen_frame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
+                app:layout_constraintBottom_toTopOf="@id/exo_progress"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/exo_ffwd">
+
+                <ImageButton
+                    android:id="@+id/exo_fullscreen_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:src="@drawable/ic_baseline_fullscreen_36" />
+            </FrameLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </FrameLayout>
+<!--</androidx.constraintlayout.widget.ConstraintLayout>-->

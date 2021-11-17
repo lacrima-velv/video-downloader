@@ -1,0 +1,14 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Video Downloader</string>
+    <string name="app_description">App for downloading an displaying videos</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string-array name="video_links">
+        <item>https://www.ixbt.com/multimedia/video-methodology/formats/2k-4k/3840x2160.mp4</item>
+        <item>https://www.ixbt.com/multimedia/video-methodology/formats/2k-4k/2048x1536.mp4</item>
+        <item>https://www.ixbt.com/multimedia/video-methodology/formats/2k-4k/4096x2160.mp4</item>
+        <item>https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4</item>
+        <item tools:ignore="TypographyDashes,Typos">https://www.ixbt.com/multimedia/video-methodology/camcorders-and-others/3d/3d-jvc-gs-td1-avc-high@l4.0-1920x1080-50i-aac-2ch-c.mp4</item>
+        <item tools:ignore="TypographyDashes">https://www.ixbt.com/multimedia/video-methodology/formats/standard/h.264-1920x1080-24fps-aac.mkv</item>
+        <item>https://filesamples.com/samples/video/3gp/sample_1920x1080.3gp</item>
+    </string-array>
+</resources>
