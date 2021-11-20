@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Context.CONNECTIVITY_SERVICE
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.Build
 import android.text.Editable
 import android.text.TextWatcher
@@ -12,8 +13,14 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.inputmethod.InputMethodManager
+import androidx.core.net.toUri
 import androidx.core.view.*
+import com.example.videodownloader.Util.bytesToKilobytes
+import com.example.videodownloader.Util.bytesToMegabytes
 import timber.log.Timber
+import kotlin.math.nextUp
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
 object Util {
     /**
@@ -106,17 +113,22 @@ object Util {
         var isConnectedToWiFi = false
         val connMgr = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val network = connMgr.activeNetwork ?: return false
-            val activeNetwork = connMgr.getNetworkCapabilities(network)
-            if (activeNetwork == null) {
+            val network = connMgr.activeNetwork
+            if (network == null) {
                 isConnectedToWiFi = false
-            }
-            if (activeNetwork != null) {
-                return when {
-                    activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-                    else -> false
+            } else {
+                val activeNetwork = connMgr.getNetworkCapabilities(network)
+                if (activeNetwork == null) {
+                    isConnectedToWiFi = false
+                }
+                if (activeNetwork != null) {
+                    isConnectedToWiFi = when {
+                        activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                        else -> false
+                    }
                 }
             }
+
         } else {
             connMgr.allNetworks.forEach { network ->
                 val type = connMgr.getNetworkInfo(network)?.type
@@ -128,6 +140,7 @@ object Util {
             }
 
         }
+        Timber.d("checkIsConnectedToWiFi() returned $isConnectedToWiFi")
         return isConnectedToWiFi
     }
 
@@ -154,12 +167,35 @@ object Util {
         }
     }
 
-    fun addUriSchemaIfNecessary(editableText: Editable): Editable {
-        if (!(editableText.startsWith("https://", true) ||
-                    editableText.startsWith("http://", true))
+//    fun addUriSchemaIfNecessary(editableText: Editable): Editable {
+//        if (!(editableText.startsWith("https://", true) ||
+//                    editableText.startsWith("http://", true))
+//        ) {
+//            editableText.insert(0, "https://")
+//        }
+//        return editableText
+//    }
+
+    fun addUriSchemaIfNecessary(currentUri: Uri): Uri {
+        var modifiedCurrentUri = currentUri
+        if (!(currentUri.toString().startsWith("https://", true) ||
+                    currentUri.toString().startsWith("http://", true))
         ) {
-            editableText.insert(0, "https://")
+            modifiedCurrentUri = "https://$currentUri".toUri()
         }
-        return editableText
+        return modifiedCurrentUri
+    }
+
+    val Long.bytesToKilobytes
+        get() = this.toFloat() / 1024
+
+
+    val Long.bytesToMegabytes
+        get() = this.toFloat() / 1024f.pow(2)
+
+    fun prettyBytes(bytes: Long) = when (bytes.toFloat()) {
+        in 0f .. 1023f -> String.format("%.1f", bytes.bytesToKilobytes) + " kB"
+        in 1024f .. Float.MAX_VALUE -> String.format("%.1f", bytes.bytesToMegabytes) + " MB"
+        else -> "$bytes B"
     }
 }

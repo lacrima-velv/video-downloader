@@ -1,24 +1,20 @@
 package com.example.videodownloader
 
+import android.app.Application
 import android.content.res.Configuration
 import android.graphics.Color
-import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.net.toUri
 import androidx.core.view.*
-import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.videodownloader.Util.addUriSchemaIfNecessary
@@ -54,9 +50,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fullscreenToolbar: Toolbar
     private lateinit var controller: PlayerControlView
     private lateinit var constraints: ConstraintSet
-    private var videoUri: Uri = "".toUri()
+    private lateinit var viewModelFactory: MainViewModelFactory
+    //private var videoUri: Uri = "".toUri()
 
-    private lateinit var viewModel: ViewModel
+    private lateinit var mainViewModel: MainViewModel
 
     //private var currentWindow = 0
     private var playbackPosition: Long = 0
@@ -67,23 +64,37 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
 
+
+
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
 
+        //Timber.d("OnCreate: Video uri is $videoUri")
+
+        viewModelFactory = MainViewModelFactory(Application(), this)
+
+        mainViewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
 
 
-        viewModel = ViewModelProvider(this).get(ViewModel::class.java)
+        //mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
 
-        viewModel.preparePlayer()
+        mainViewModel.preparePlayer()
 
         lifecycleScope.launchWhenStarted {
-            viewModel.isFullscreenOn.collectLatest { }
+            mainViewModel.isFullscreenOn.collectLatest { }
         }
 
         lifecycleScope.launchWhenStarted {
-            viewModel.downloadState.collectLatest {
+            mainViewModel.downloadState.collectLatest {
                 showSuitableUiState()
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            mainViewModel.currentUri.collectLatest {
+                Timber.d("mainViewModel.currentUri.value is ${mainViewModel.currentUri.value}")
+               // binding.inputUri.text = SpannableStringBuilder(viewModel.currentUri.value.toString())
             }
         }
 
@@ -96,48 +107,45 @@ class MainActivity : AppCompatActivity() {
         constraints = ConstraintSet()
 
 
-        Timber.d("Download state is ${viewModel.downloadState.value}")
+        Timber.d("Download state is ${mainViewModel.downloadState.value}")
 
         // Get player instance
-        binding.playerView.player = viewModel.exoPlayer
+        binding.playerView.player = mainViewModel.exoPlayer
 
         binding.setUpAutoCompleteView()
 
         binding.downloadButton.setOnClickListener {
-
             showStartedDownloadWidgets()
-
-//            if (!viewModel.isPlayerPrepared()) {
-//                viewModel.preparePlayer()
-//            }
-//            val videoUriFromInput = videoUri ?: binding.inputUri.editableText
-
-            Timber.d("Video uri is $videoUri")
             downloadVideo()
-
         }
 
         binding.clearButton.setOnClickListener {
-            viewModel.clearAllDownloadedVideos(this)
-            viewModel.pausePlayer()
+            mainViewModel.clearAllDownloadedVideos(this)
+            mainViewModel.pausePlayer()
         }
 
         binding.pauseButton.setOnClickListener {
-            viewModel.pauseDownloading(this)
+            mainViewModel.pauseDownloading(this, mainViewModel.currentUri.value)
         }
 
-//        binding.resumeButton.setOnClickListener {
-//            if (checkIsConnectedToWifi()) {
-//                viewModel.resumeDownloading(this)
-//            } else {
-//                showErrorWifiResumeWidgets()
-//            }
-//
-//        }
+        binding.resumeButton.setOnClickListener {
+            if (checkIsConnectedToWifi()) {
+                mainViewModel.resumeDownloading(this, mainViewModel.currentUri.value)
+            } else {
+                showErrorWifiResumeWidgets()
+            }
 
-//        binding.retryButton.setOnClickListener {
-//            viewModel.continueDownloadFailedVideo(this, videoUri)
-//        }
+        }
+
+        binding.retryButton.setOnClickListener {
+           // downloadVideo()
+            retryDownload()
+        }
+
+        binding.retryButtonNoWifi.setOnClickListener {
+            //downloadVideo()
+            retryDownload()
+        }
 
         binding.tryAnotherLinkButton.setOnClickListener {
             showNotStartedDownloadWidgets()
@@ -150,6 +158,11 @@ class MainActivity : AppCompatActivity() {
 
 
         setContentView(binding.root)
+    }
+
+    override fun onStart() {
+        super.onStart()
+       // Timber.d("OnStart: Video uri is $videoUri")
     }
 
     private fun ActivityMainBinding.allChangeableWidgets() = listOf(
@@ -168,7 +181,9 @@ class MainActivity : AppCompatActivity() {
         errorEmptyInput,
         errorWifi,
         clearInputUri,
-        tryAnotherLinkButton
+        tryAnotherLinkButton,
+        retryButtonNoWifi,
+        errorWifiResume
     )
 
     private fun ActivityMainBinding.notStartedDownloadWidgets() = listOf(
@@ -203,9 +218,8 @@ class MainActivity : AppCompatActivity() {
     )
     private fun ActivityMainBinding.wifiErrorDownloadWidgets() = listOf(
         errorWifi,
-        retryButton,
+        retryButtonNoWifi,
         emptyPlayerPlaceholder,
-        tryAnotherLinkButton,
         toolbar
     )
     private fun ActivityMainBinding.errorEmptyInputWidgets() = listOf(
@@ -216,7 +230,7 @@ class MainActivity : AppCompatActivity() {
         toolbar
     )
     private fun ActivityMainBinding.wifiErrorResumeWidgets() = listOf(
-        errorWifi,
+        errorWifiResume,
         resumeButton,
         emptyPlayerPlaceholder,
         toolbar
@@ -253,7 +267,7 @@ class MainActivity : AppCompatActivity() {
         fullscreenButton.setOnClickListener {
             Timber.d("Fullscreen button clicked")
             //if (fullscreenButton.tag != R.drawable.ic_baseline_fullscreen_exit_36) {
-            if (!viewModel.isFullscreenOn.value) {
+            if (!mainViewModel.isFullscreenOn.value) {
                 openPlayerInFullscreen()
             } else {
                 returnFromPlayerInFullscreen()
@@ -278,6 +292,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun ActivityMainBinding.setUpAutoCompleteView() {
+        // TODO: Fix bug^ sometimes X is not displayed when there is text in the field
         val videoLinks = resources.getStringArray(R.array.video_links).toList()
         inputUri.setAdapter(ArrayAdapter(this@MainActivity, android.R.layout.simple_dropdown_item_1line, videoLinks))
         inputUri.threshold = 2
@@ -298,6 +313,9 @@ class MainActivity : AppCompatActivity() {
             inputUri.editableText.clear()
         }
 
+        // Initially show clear button only if there are any text in input view
+        clearInputUri.isVisible = inputUri.editableText.isNotEmpty()
+
         inputUri.addTextChangedListener(
             textWatcherForClearingTextButton(clearInputUri)
         )
@@ -307,13 +325,15 @@ class MainActivity : AppCompatActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
 
+        Timber.d("onConfigurationChanged: Video uri is ${binding.inputUri.editableText}")
+
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            if (viewModel.isFullscreenOn.value) {
+            if (mainViewModel.isFullscreenOn.value) {
                 setFullScreen()
             }
 
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            if (viewModel.isFullscreenOn.value) {
+            if (mainViewModel.isFullscreenOn.value) {
                 removeStatusBar()
                 ViewCompat.setOnApplyWindowInsetsListener(controller) { view, insets ->
                     view.updatePadding(bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom)
@@ -324,30 +344,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openPlayerInFullscreen() {
-        viewModel.setIsFullscreenOn(true)
-        val constraints = ConstraintSet()
-        val constraintLayout = findViewById<ConstraintLayout>(R.id.main_layout)
+        mainViewModel.setIsFullscreenOn(true)
         constraints.apply {
-            clone(constraintLayout)
+            clone(binding.mainLayout)
             connect(R.id.player_frame, ConstraintSet.TOP, R.id.main_layout, ConstraintSet.TOP, 0)
             setDimensionRatio(R.id.player_frame, null)
             setMargin(R.id.player_frame, ConstraintSet.BOTTOM, 0)
             setMargin(R.id.player_frame, ConstraintSet.START, 0)
             setMargin(R.id.player_frame, ConstraintSet.END, 0)
-            applyTo(constraintLayout)
+            applyTo(binding.mainLayout)
         }
 
         binding.root.setBackgroundColor(Color.BLACK)
 
         setUpWidgetsForDifferentStates(fullscreenVideoWidgets())
 
-
-//        binding.toolbar.isVisible = false
-//        binding.inputUri.isVisible = false
-//        binding.downloadButton.isVisible = false
-        //binding.toolbar.isVisible = true
         fullscreenButton.setImageResource(R.drawable.ic_baseline_fullscreen_exit_36)
-       // fullscreenButton.tag = R.drawable.ic_baseline_fullscreen_exit_36
 
         val screenOrientation = this.resources.configuration.orientation
 
@@ -360,18 +372,13 @@ class MainActivity : AppCompatActivity() {
         } else {
             setFullScreen()
         }
-
-       // fullscreenToolbar.isVisible = true
-
     }
 
     private fun returnFromPlayerInFullscreen() {
-        viewModel.setIsFullscreenOn(false)
+        mainViewModel.setIsFullscreenOn(false)
         val margin = convertDpToPixels(this, 16)
-        val constraintLayout = findViewById<ConstraintLayout>(R.id.main_layout)
-        val constraints = ConstraintSet()
         constraints.apply {
-            clone(constraintLayout)
+            clone(binding.mainLayout)
             connect(R.id.player_frame, ConstraintSet.TOP, R.id.guideline, ConstraintSet.BOTTOM, 0)
             connect(R.id.player_frame, ConstraintSet.START, R.id.main_layout, ConstraintSet.START, margin)
             connect(R.id.player_frame, ConstraintSet.END, R.id.main_layout, ConstraintSet.END, margin)
@@ -379,7 +386,7 @@ class MainActivity : AppCompatActivity() {
             setDimensionRatio(R.id.player_frame, "16:9")
             constrainWidth(R.id.player_frame, 0)
             constrainHeight(R.id.player_frame, 0)
-            applyTo(constraintLayout)
+            applyTo(binding.mainLayout)
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(controller) { view, insets ->
@@ -401,7 +408,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         //if (fullscreenButton.tag == R.drawable.ic_baseline_fullscreen_exit_36) {
-        if (viewModel.isFullscreenOn.value) {
+        if (mainViewModel.isFullscreenOn.value) {
             returnFromPlayerInFullscreen()
         } else {
             super.onBackPressed()
@@ -410,18 +417,19 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putLong(STATE_RESUME_POSITION, viewModel.getPlaybackPosition())
-        outState.putBoolean(STATE_PLAYER_PLAYING, viewModel.isPlayerPlaying())
+        outState.putLong(STATE_RESUME_POSITION, mainViewModel.getPlaybackPosition())
+        outState.putBoolean(STATE_PLAYER_PLAYING, mainViewModel.isPlayerPlaying())
     }
 
     // TODO CheckForEmptiness
     private fun showDownloadProgress() {
-        videoUri = binding.inputUri.editableText.toString().toUri()
+
+        //videoUri = binding.inputUri.editableText.toString().toUri()
        // val gotUri = videoUri ?: binding.inputUri.editableText.toString().toUri()
-        Timber.d("videoUri in showDownloadProgress() is $videoUri")
+        Timber.d("videoUri in showDownloadProgress() is ${mainViewModel.currentUri.value}")
             lifecycleScope.launch {
-                viewModel.downloadState.collectLatest {
-                    viewModel.getDownloadedBytes(videoUri).collectLatest {
+                mainViewModel.downloadState.collectLatest {
+                    mainViewModel.getDownloadedBytes(mainViewModel.currentUri.value).collectLatest {
                         binding.downloadingProgress.text = it.toString()
 
                     }
@@ -450,37 +458,78 @@ class MainActivity : AppCompatActivity() {
         //showDownloadProgress()
     }
 
-
-    private fun downloadVideo() {
-        //TODO: Clear cache before downloading something new!
-        viewModel.clearAllDownloadedVideos(this)
-        /*
-        Show an error under view for video link if it remained empty after clicking Download.
-        Don't start downloading at that case.
-         */
-        if (!checkIsEmptyAutoCompleteView()) {
-            videoUri = binding.inputUri.editableText.toString().toUri()
-            Timber.d("videoUri is $videoUri")
-            videoUri = addUriSchemaIfNecessary(binding.inputUri.editableText).toString().toUri()
-            Timber.d("videoUri after calling addUriSchemaIfNecessary() is $videoUri")
-            //isConnected?
-            if (checkIsConnectedToWifi()) {
-                Timber.d("Started download")
-                Timber.d("viewModel.downloadState is ${viewModel.downloadState.value}")
-                // Start downloading only at the initial state, when cache is empty and nothing is downloading
-                if (viewModel.downloadState.value == ViewModel.DownloadState.NotStarted ||
-                    viewModel.downloadState.value == ViewModel.DownloadState.Removing
+    // TODO: When proxy is turned on sometimes app stacks at QUEUED state. Make a timeout and return failed at thate case!
+    private fun retryDownload() {
+        if (checkIsConnectedToWifi()) {
+            if (mainViewModel.checkHaveFailedDownloadedVideo()) {
+                mainViewModel.downloadFailedVideo(this)
+            } else {
+                mainViewModel.downloadVideo(this, mainViewModel.currentUri.value)
+                if (mainViewModel.downloadState.value != MainViewModel.DownloadState.Downloading
                 ) {
-                    viewModel.downloadVideo(this, videoUri)
+                    mainViewModel.downloadVideo(this, mainViewModel.currentUri.value)
+                    Timber.d("Started download")
                 }
-                showDownloadProgress()
             }
         }
     }
 
+
+    private fun downloadVideo() {
+        mainViewModel.updateCurrentUri(binding.inputUri.editableText.toString().toUri())
+        if (checkIsConnectedToWifi()) {
+                /*
+            Show an error under view for video link if it remained empty after clicking Download.
+            Don't start downloading at that case.
+             */
+                if (!checkIsEmptyAutoCompleteView()) {
+
+                    Timber.d("Don't have failed downloads. Last uri is ${mainViewModel.currentUri.value}")
+                    //TODO: Check if something in the cache before clearing!!! And actually you don't use downloading failed videos!
+                    // TODO: It doesn't work correctly if I changed link. It still tries to download failed video!!!
+                    mainViewModel.clearAllDownloadedVideos(this)
+
+                    mainViewModel.updateCurrentUri(addUriSchemaIfNecessary(mainViewModel.currentUri.value))
+                    Timber.d("videoUri after calling addUriSchemaIfNecessary() is ${mainViewModel.currentUri.value}")
+                    //isConnected?
+
+                    // Start downloading only when nothing is downloading
+                    mainViewModel.downloadVideo(this, mainViewModel.currentUri.value)
+                    if (mainViewModel.downloadState.value != MainViewModel.DownloadState.Downloading
+                    ) {
+                        mainViewModel.downloadVideo(this, mainViewModel.currentUri.value)
+                        Timber.d("Started download")
+                    }
+                }
+            }
+
+        }
+   // }
+
+//    private fun downloadWithUpdatingCurrentUri() {
+//        //mainViewModel.updateCurrentUri(binding.inputUri.editableText.toString().toUri())
+//        Timber.d("Video uri is ${mainViewModel.currentUri.value} after updating it in downloadWithUpdatingCurrentUri()")
+//        downloadWithoutUpdatingCurrentUri()
+//    }
+
+
+
+
+//    private fun downloadVideo() {
+////        if (binding.inputUri.editableText.isNotEmpty()) {
+////            viewModel.updateCurrentUri(binding.inputUri.editableText.toString().toUri())
+////        }
+//
+//    }
+
     private fun showCompletedDownloadWidgets() {
         setUpWidgetsForDifferentStates(binding.completedDownloadWidgets())
-        viewModel.playDownloadedVideo(isPlayerPlaying, playbackPosition)
+        if (mainViewModel.checkHaveCompletelyDownloadedVideo()) {
+            mainViewModel.playDownloadedVideo(isPlayerPlaying, playbackPosition)
+        } else {
+            showGeneralErrorDownloadWidgets()
+        }
+
     }
 
     // TODO: Check also Internet connection because there is no error when
@@ -490,6 +539,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showWifiErrorDownloadingWidgets() {
+        Timber.d("showWifiErrorDownloadingWidgets() is called")
         setUpWidgetsForDifferentStates(binding.wifiErrorDownloadWidgets())
     }
 
@@ -511,44 +561,51 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showSuitableUiState() {
-        when (viewModel.downloadState.value) {
-            ViewModel.DownloadState.NotStarted -> {
+        when (mainViewModel.downloadState.value) {
+            MainViewModel.DownloadState.NotStarted -> {
                 showNotStartedDownloadWidgets()
             }
-            ViewModel.DownloadState.Removing -> {
+            MainViewModel.DownloadState.Removing -> {
                 showNotStartedDownloadWidgets()
             }
-            ViewModel.DownloadState.SomethingIsDownloading -> {
+//            ViewModel.DownloadState.SomethingIsDownloading -> {
+//                showStartedDownloadWidgets()
+//            }
+//            ViewModel.DownloadState.SomethingIsDownloaded -> {
+//                showCompletedDownloadWidgets()
+//            }
+            MainViewModel.DownloadState.Queued -> {
+                // Downloading is already started (cannot be paused because I use sendStopReason() instead of pause())
                 showStartedDownloadWidgets()
+                showDownloadProgress()
             }
-            ViewModel.DownloadState.SomethingIsDownloaded -> {
-                showCompletedDownloadWidgets()
-            }
-            ViewModel.DownloadState.Queued -> {
-                // Downloading is paused or is already started
-                showPausedDownloadWidgets()
-            }
-            ViewModel.DownloadState.Downloading -> {
+            MainViewModel.DownloadState.Downloading -> {
+                Timber.d("ViewModel.DownloadState.Downloading")
                 //viewModel.setStopReasonDuringDownloading(this, videoUri)
                 showStartedDownloadWidgets()
+                showDownloadProgress()
             }
-            ViewModel.DownloadState.Restarting -> {
+            MainViewModel.DownloadState.Restarting -> {
+                Timber.d("ViewModel.DownloadState.Restarting")
                 showStartedDownloadWidgets()
             }
-            ViewModel.DownloadState.Completed -> {
+            MainViewModel.DownloadState.Completed -> {
                 Timber.d("Completed download")
                 showCompletedDownloadWidgets()
             }
-            ViewModel.DownloadState.Failed -> {
-                //viewModel.setStopReasonDuringDownloading(this, videoUri)
+            MainViewModel.DownloadState.Failed -> {
+                // TODO: Probably should not call this
+               // viewModel.setStopReasonDuringDownloading(this, viewModel.currentUri.value)
                 showGeneralErrorDownloadWidgets()
 
             }
-            else -> {
-                // TODO: The same as for NotStarted
+            MainViewModel.DownloadState.Stopped -> {
+                showPausedDownloadWidgets()
             }
         }
     }
+
+    //TODO: In Dark mode download progress is not visible!
 
 //    override fun onStart() {
 //        super.onStart()

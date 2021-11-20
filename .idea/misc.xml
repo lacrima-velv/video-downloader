@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/lacri/AndroidStudioProjects/VideoDownloader/app/src/main/res/drawable/ic_baseline_clear_24.xml" value="0.211" />
+        <entry key="..\:/Users/lacri/AndroidStudioProjects/VideoDownloader/app/src/main/res/drawable/ic_baseline_clear_36.xml" value="0.1905" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/VideoDownloader/app/src/main/res/drawable/ic_baseline_fullscreen_24.xml" value="0.1" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/VideoDownloader/app/src/main/res/drawable/ic_baseline_fullscreen_40.xml" value="0.1835" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/VideoDownloader/app/src/main/res/drawable/ic_baseline_fullscreen_48.xml" value="0.1835" />
@@ -14,8 +15,8 @@
         <entry key="..\:/Users/lacri/AndroidStudioProjects/VideoDownloader/app/src/main/res/drawable/ic_baseline_ondemand_video_24.xml" value="0.1835" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/VideoDownloader/app/src/main/res/drawable/ic_outline_cloud_download_24.xml" value="0.1835" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/VideoDownloader/app/src/main/res/layout-v24/activity_main.xml" value="0.31851851851851853" />
-        <entry key="..\:/Users/lacri/AndroidStudioProjects/VideoDownloader/app/src/main/res/layout/activity_main.xml" value="0.25" />
-        <entry key="..\:/Users/lacri/AndroidStudioProjects/VideoDownloader/app/src/main/res/layout/exo_player_control_view.xml" value="0.25" />
+        <entry key="..\:/Users/lacri/AndroidStudioProjects/VideoDownloader/app/src/main/res/layout/activity_main.xml" value="0.5" />
+        <entry key="..\:/Users/lacri/AndroidStudioProjects/VideoDownloader/app/src/main/res/layout/exo_player_control_view.xml" value="0.33" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/VideoDownloader/app/src/main/res/layout/exo_player_control_view2.xml" value="0.33" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/VideoDownloader/app/src/main/res/layout/exo_player_view.xml" value="0.22" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/VideoDownloader/app/src/main/res/layout/fragment_denied_permission_dialog_explanation.xml" value="0.2265625" />

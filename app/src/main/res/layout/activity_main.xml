@@ -146,7 +146,7 @@
         android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/downloading_progress"
+        app:layout_constraintTop_toBottomOf="@id/error_wifi_resume"
         app:layout_constraintBottom_toTopOf="@id/guideline"
         android:text="Resume"
         android:visibility="gone"
@@ -178,6 +178,18 @@
         app:layout_constraintTop_toBottomOf="@id/error_general"
         app:layout_constraintBottom_toTopOf="@id/guideline"/>
 
+    <Button
+        android:id="@+id/retry_button_no_wifi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="Retry"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/error_wifi"
+        app:layout_constraintBottom_toTopOf="@id/guideline"/>
+
     <TextView
         android:id="@+id/error_general"
         android:layout_width="wrap_content"
@@ -206,6 +218,20 @@
         app:layout_constraintTop_toBottomOf="@id/appbar"
         tools:visibility="visible"/>
 
+    <TextView
+        android:id="@+id/error_wifi_resume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="No Wi-Fi connection.\nPlease try again later."
+        android:textAlignment="center"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/resume_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/appbar"
+        tools:visibility="visible"/>
+
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
         android:layout_width="wrap_content"
@@ -222,9 +248,10 @@
         android:layout_marginEnd="8dp"
         android:imeOptions="flagNoExtractUi"
         android:inputType="textUri"
+        android:dropDownHeight="wrap_content"
         android:hint="Enter http link to video"
         android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/clear_input_uri"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/appbar"
         tools:visibility="visible"/>
@@ -248,7 +275,8 @@
         android:id="@+id/clear_input_uri"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_baseline_clear_24"
+        android:layout_marginBottom="8dp"
+        android:src="@drawable/ic_baseline_clear_36"
         android:background="?attr/selectableItemBackground"
         app:layout_constraintBottom_toBottomOf="@id/inputUri"
         app:layout_constraintTop_toTopOf="@id/inputUri"

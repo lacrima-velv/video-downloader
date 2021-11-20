@@ -32,6 +32,7 @@
                 android:id="@+id/appbar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:theme="@style/Widget.Theme.VideoDownloader.AppBar"
                 android:background="@color/nav_and_status_bar_scrim"
                 android:fitsSystemWindows="true"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -40,10 +41,9 @@
 
                         <com.google.android.material.appbar.MaterialToolbar
                             android:id="@+id/toolbar_fullscreen"
-                            style="@style/Widget.MaterialComponents.Toolbar.Primary"
+                            style="@style/Widget.Material3.ActionBar.Solid"
                             android:layout_width="match_parent"
                             android:layout_height="?attr/actionBarSize"
-                            android:background="@color/transparent"
                             android:visibility="gone"
                             app:navigationIcon="@drawable/ic_baseline_keyboard_backspace_24"
                             app:title="Video"
@@ -127,7 +127,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/exo_duration"
                 app:layout_constraintStart_toEndOf="@id/exo_position"
-                app:played_color="@color/dark_gray"
+                app:played_color="?attr/colorPrimaryVariant"
                 app:unplayed_color="@color/gray" />
 
             <TextView
@@ -135,8 +135,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:includeFontPadding="false"
-                android:paddingLeft="4dp"
-                android:paddingRight="16dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="16dp"
                 android:textColor="@color/gray"
                 android:textSize="14sp"
                 android:textStyle="bold"
