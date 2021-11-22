@@ -4,7 +4,7 @@
         <trust-anchors>
         <!-- Trust preinstalled CAs -->
         <certificates src="system" />
-        <!-- HERE: Additionally trust user added CAs -->
+        <!-- Additionally trust user added CAs -->
         <certificates src="user"/>
         </trust-anchors>
     </debug-overrides>

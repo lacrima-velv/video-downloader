@@ -1,15 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
-<!--    xmlns:tools="http://schemas.android.com/tools"-->
-<!--    android:id="@+id/my_exo_controls"-->
-<!--    android:layout_width="match_parent"-->
-<!--    android:layout_height="wrap_content"-->
-<!--    android:layout_gravity="bottom"-->
-<!--    android:background="#CC000000"-->
-<!--    android:paddingStart="8dp"-->
-<!--    android:paddingEnd="8dp"-->
-<!--    tools:targetApi="28">-->
 
 <FrameLayout android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -62,7 +51,8 @@
                 app:layout_constraintBottom_toTopOf="@id/exo_progress"
                 app:layout_constraintEnd_toStartOf="@id/exo_play"
                 app:layout_constraintStart_toStartOf="parent"
-                app:tint="@color/gray" />
+                app:tint="@color/gray"
+                android:contentDescription="@string/move_backward_description" />
 
             <ImageButton
                 android:id="@id/exo_play"
@@ -75,7 +65,8 @@
                 app:layout_constraintBottom_toTopOf="@id/exo_progress"
                 app:layout_constraintEnd_toStartOf="@id/exo_pause"
                 app:layout_constraintStart_toEndOf="@id/exo_rew"
-                app:played_color="@color/design_default_color_primary_dark" />
+                app:played_color="@color/design_default_color_primary_dark"
+                android:contentDescription="@string/play_video_description" />
 
             <ImageButton
                 android:id="@id/exo_pause"
@@ -88,7 +79,8 @@
                 app:layout_constraintBottom_toTopOf="@id/exo_progress"
                 app:layout_constraintEnd_toStartOf="@id/exo_ffwd"
                 app:layout_constraintStart_toEndOf="@id/exo_play"
-                app:played_color="@color/design_default_color_primary_dark" />
+                app:played_color="@color/design_default_color_primary_dark"
+                android:contentDescription="@string/pause_video_description" />
 
             <ImageButton
                 android:id="@id/exo_ffwd"
@@ -101,7 +93,8 @@
                 app:layout_constraintBottom_toTopOf="@id/exo_progress"
                 app:layout_constraintEnd_toStartOf="@id/exo_fullscreen_frame"
                 app:layout_constraintStart_toEndOf="@id/exo_pause"
-                app:played_color="@color/design_default_color_primary_dark" />
+                app:played_color="@color/design_default_color_primary_dark"
+                android:contentDescription="@string/move_forward_description" />
 
             <TextView
                 android:id="@id/exo_position"
@@ -160,9 +153,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
-                    android:src="@drawable/ic_baseline_fullscreen_36" />
+                    android:src="@drawable/ic_baseline_fullscreen_36"
+                    android:contentDescription="@string/fullscreen_button_description" />
             </FrameLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </FrameLayout>
-<!--</androidx.constraintlayout.widget.ConstraintLayout>-->

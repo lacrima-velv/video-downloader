@@ -1,14 +1,64 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Video Downloader</string>
-    <string name="app_description">App for downloading an displaying videos</string>
-    <!-- TODO: Remove or change this placeholder text -->
+    <!-- Also used for foreground notification when downloading a video -->
+    <string name="channel_description">Downloading video</string>
+    <string name="empty_player_placeholder">Video will be played automatically
+        \n after downloading</string>
+    <string name="error_player_placeholder">An Error occurred during playback.</string>
+    <string name="download_button">Download</string>
+    <string name="pause_button">Pause</string>
+    <string name="clear_button">Clear</string>
+    <string name="resume_button">Resume</string>
+    <string name="retry_button">Retry</string>
+    <string name="another_link_button">Another link</string>
+    <string name="retry_no_wifi_button">Retry</string>
+    <string name="error_downloading">An error occurred while downloading.
+        \nPlease try again later.</string>
+    <string name="error_file_too_big">The file is larger than 200 MB.
+        \nIt won\'t be downloaded.</string>
+    <string name="error_no_wifi">No Wi-Fi connection.\nPlease try again later.</string>
+    <string name="input_link_hint">Enter https link to video</string>
+    <string name="error_empty_input">Please input a video url</string>
+    <string name="clear_text_button_description">Clear text</string>
+    <string name="fullscreen_button_description">Open video in fullscreen
+        or return to non-fullscreen</string>
+    <string name="move_forward_description">Move video playback forward</string>
+    <string name="pause_video_description">Pause video</string>
+    <string name="play_video_description">Play video</string>
+    <string name="move_backward_description">Move video playback backward</string>
+
     <string-array name="video_links">
+        <!-- 147 MB -->
         <item>https://www.ixbt.com/multimedia/video-methodology/formats/2k-4k/3840x2160.mp4</item>
+        <!-- 98.8 MB -->
         <item>https://www.ixbt.com/multimedia/video-methodology/formats/2k-4k/2048x1536.mp4</item>
+        <!-- 174 MB -->
         <item>https://www.ixbt.com/multimedia/video-methodology/formats/2k-4k/4096x2160.mp4</item>
+        <!-- 10 MB -->
         <item>https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4</item>
-        <item tools:ignore="TypographyDashes,Typos">https://www.ixbt.com/multimedia/video-methodology/camcorders-and-others/3d/3d-jvc-gs-td1-avc-high@l4.0-1920x1080-50i-aac-2ch-c.mp4</item>
-        <item tools:ignore="TypographyDashes">https://www.ixbt.com/multimedia/video-methodology/formats/standard/h.264-1920x1080-24fps-aac.mkv</item>
+        <!-- 212 MB -->
+        <item tools:ignore="TypographyDashes,Typos">https://www.ixbt.com/multimedia/
+            video-methodology/camcorders-and-others/3d/
+            3d-jvc-gs-td1-avc-high@l4.0-1920x1080-50i-aac-2ch-c.mp4</item>
+        <!-- 55 MB -->
+        <item tools:ignore="TypographyDashes">https://www.ixbt.com/multimedia/video-methodology/
+            formats/standard/h.264-1920x1080-24fps-aac.mkv</item>
+        <!-- 37 MB -->
         <item>https://filesamples.com/samples/video/3gp/sample_1920x1080.3gp</item>
+        <!-- >1 MB -->
+        <item>https://evtesteventsdata.blob.core.windows.net/
+            app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/broken_video.mp4</item>
+        <!-- 28.5 MB -->
+        <item>https://evtesteventsdata.blob.core.windows.net/
+            app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/iphone11pro.mp4</item>
+        <!-- 28.5 MB -->
+        <item>http://evtesteventsdata.blob.core.windows.net/
+            app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/iphone11pro.mp4</item>
+        <!-- 131 MB -->
+        <item>https://evtesteventsdata.blob.core.windows.net/
+            app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/video.avi</item>
+        <!-- 6.7 MB -->
+        <item>https://evtesteventsdata.blob.core.windows.net/
+            app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/Stephanie Mabey - The Zombie Song.mp3</item>
     </string-array>
 </resources>

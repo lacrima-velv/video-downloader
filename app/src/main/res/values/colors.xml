@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_700">#ab47bc</color>
-    <color name="blue_500">#1565c0</color>
-    <color name="blue_700">#003c8f</color>
-    <color name="blue_purple_200">#534bae</color>
-    <color name="blue_purple_700">#1a237e</color>
+    <color name="purple_light">#FFBB86FC</color>
+    <color name="purple_medium">#ab47bc</color>
+    <color name="purple_dark">#2D0460</color>
+    <color name="blue_medium">#1565c0</color>
+    <color name="blue_dark">#003c8f</color>
+    <color name="blue_purple_medium">#534bae</color>
+    <color name="blue_purple_dark">#1a237e</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="gray">#eceff1</color>
-    <color name="dark_gray">#37474f</color>
+    <color name="gray_dark">#37474f</color>
     <color name="transparent">#00000000</color>
     <color name="nav_and_status_bar_scrim">#80000000</color>
     <color name="gray_purple">#c5cae9</color>

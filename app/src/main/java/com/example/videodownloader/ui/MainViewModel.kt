@@ -1,12 +1,17 @@
-package com.example.videodownloader
+@file:Suppress("JoinDeclarationAndAssignment")
+
+package com.example.videodownloader.ui
 
 import android.app.Application
 import android.content.Context
 import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.SavedStateHandle
+import com.example.videodownloader.service.VideoDownloadService
+import com.example.videodownloader.videoutil.VideoUtil
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.PlaybackException
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.offline.*
 import kotlinx.coroutines.flow.*
 import org.koin.core.component.KoinComponent
@@ -14,19 +19,15 @@ import org.koin.core.component.inject
 import timber.log.Timber
 import java.lang.Exception
 
-private const val DEFAULT_URI = ""
-private const val CURRENT_URI = ""
-
 class MainViewModel(
-    application: Application,
-    private val savedStateHandle: SavedStateHandle
+    application: Application
 ): AndroidViewModel(application), KoinComponent {
 
     private val videoUtil: VideoUtil by inject()
     private var initialDownloadState: DownloadState = DownloadState.NotStarted
     lateinit var exoPlayer: ExoPlayer
 
-    private val _currentUri = MutableStateFlow(DEFAULT_URI.toUri())
+    private val _currentUri = MutableStateFlow("".toUri())
     val currentUri: StateFlow<Uri>
         get() = _currentUri
 
@@ -34,20 +35,10 @@ class MainViewModel(
         _currentUri.value = videoUri
     }
 
-
-//    private val _bytesDownloaded = MutableStateFlow<Float?>(0f)
-//    val bytesDownloaded: StateFlow<Float?>
-//        get() = _bytesDownloaded
-
-    fun getDownloadedBytes2(videoUri: Uri): Flow<Long?> {
-        return videoUtil.getCurrentProgressDownload2(videoUri)
-    }
-
+    // Used to show download progress
     fun getDownloadedBytes(videoUri: Uri): Flow<String> {
         return videoUtil.getCurrentProgressDownload(videoUri)
     }
-
-
 
     private val _downloadState = MutableStateFlow(initialDownloadState)
     val downloadState: StateFlow<DownloadState>
@@ -55,8 +46,6 @@ class MainViewModel(
 
     sealed class DownloadState {
         object NotStarted : DownloadState()
-//        object SomethingIsDownloaded : DownloadState()
-//        object SomethingIsDownloading : DownloadState()
         object Queued : DownloadState()
         object Downloading : DownloadState()
         object Restarting : DownloadState()
@@ -66,6 +55,37 @@ class MainViewModel(
         object Removing : DownloadState()
     }
 
+    /**
+     * Download state is actually failed, but the user opened the screen with input text view
+     * to use another link so we have to retain this screen, if configuration changes
+     */
+    private val _retriedAnotherLinkAfterFailed = MutableStateFlow(false)
+    val retriedAnotherLinkAfterFailed: StateFlow<Boolean>
+        get() = _retriedAnotherLinkAfterFailed
+
+    fun setRetryAnotherLinkAfterFailed(retried: Boolean) {
+        _retriedAnotherLinkAfterFailed.value = retried
+    }
+
+    // Retain video title to use it in fullscreen mode
+    private val _videoTitle = MutableStateFlow("")
+    val videoTitle: StateFlow<String>
+        get() = _videoTitle
+
+    // This value is used to show an error placeholder in player frame, if it couldn't play the file
+    private val _hasPlayerGotError = MutableStateFlow(false)
+    val hasPlayerGotError: StateFlow<Boolean>
+        get() = _hasPlayerGotError
+
+    // This value is used to show an error, if too big file is started downloading
+    private val _sizeOfDownloadingFile = MutableStateFlow(0L)
+    val sizeOfDownloadingFile: StateFlow<Long>
+        get() = _sizeOfDownloadingFile
+
+    /*
+    Used to display the corresponding UI if the video is opened in fullscreen mode
+    or returns to non-fullscreen
+    */
     private val _isFullscreenOn = MutableStateFlow(false)
     val isFullscreenOn: StateFlow<Boolean>
         get() = _isFullscreenOn
@@ -93,8 +113,34 @@ class MainViewModel(
     }
 
     fun playDownloadedVideo(isPlayerPlaying: Boolean = false, playbackPosition: Long = 0) {
-        Timber.d("playDownloadedVideo() is called. isPlayerPlaying is $isPlayerPlaying. exoPlayer error ${exoPlayer.playerError}")
+        Timber.d("playDownloadedVideo() is called. isPlayerPlaying is $isPlayerPlaying. " +
+                "playbackPosition is $playbackPosition")
+        _videoTitle.value = videoUtil.getCompletelyDownloadedItems().last().title
+
         videoUtil.playDownloadedVideo(exoPlayer, isPlayerPlaying, playbackPosition)
+    }
+
+    private val exoPlayerListener = object : Player.Listener {
+        override fun onPlayerError(error: PlaybackException) {
+            super.onPlayerError(error)
+            Timber.d("Player Listener: " +
+                    "Player has got an error! ${exoPlayer.playbackState}")
+            _hasPlayerGotError.value = true
+        }
+
+        override fun onPlayerErrorChanged(error: PlaybackException?) {
+            super.onPlayerErrorChanged(error)
+            if (error != null) {
+                Timber.d("Player Listener: " +
+                        "Player has got an error! ${exoPlayer.playbackState}")
+                _hasPlayerGotError.value = true
+
+            } else {
+                Timber.d("Player Listener: " +
+                        "Player returned from error state to normal ${exoPlayer.playbackState}")
+                _hasPlayerGotError.value = false
+            }
+        }
     }
 
     private val downloadManagerListener = object : DownloadManager.Listener {
@@ -111,6 +157,8 @@ class MainViewModel(
                 Download.STATE_DOWNLOADING -> {
                     Timber.d("Download state is STATE_DOWNLOADING")
                     _downloadState.value = DownloadState.Downloading
+                    // File size there is used to display an error, if it is too big
+                    _sizeOfDownloadingFile.value = videoUtil.getFileSizeDuringDownload() ?: 0
                     downloadManager.currentDownloads.size
                 }
                 Download.STATE_RESTARTING -> {
@@ -132,36 +180,17 @@ class MainViewModel(
                     _downloadState.value = DownloadState.Removing }
             }
         }
-
-        override fun onDownloadRemoved(downloadManager: DownloadManager, download: Download) {
-            super.onDownloadRemoved(downloadManager, download)
-            Timber.d("onDownloadRemoved")
-        }
-
-        override fun onInitialized(downloadManager: DownloadManager) {
-            super.onInitialized(downloadManager)
-            Timber.d("onInitialized")
-        }
-
-        override fun onDownloadsPausedChanged(
-            downloadManager: DownloadManager,
-            downloadsPaused: Boolean
-        ) {
-            super.onDownloadsPausedChanged(downloadManager, downloadsPaused)
-            if (downloadsPaused) {
-                Timber.d("DownloadsPaused")
-            } else  {
-                Timber.d("DownloadsResumed")
-            }
-        }
     }
 
+    // Used to play only completely downloaded video
     fun checkHaveCompletelyDownloadedVideo(): Boolean {
         return videoUtil.checkHaveCompletelyDownloadedVideo()
     }
 
+    // Used to continue downloading after fail
     fun checkHaveFailedDownloadedVideo(): Boolean {
-        Timber.d("checkHaveFailedDownloadedVideo returned ${videoUtil.checkHaveFailedDownloadedVideo()}")
+        Timber.d("checkHaveFailedDownloadedVideo returned " +
+                "${videoUtil.checkHaveFailedDownloadedVideo()}")
         return videoUtil.checkHaveFailedDownloadedVideo()
     }
 
@@ -169,84 +198,34 @@ class MainViewModel(
         videoUtil.downloadVideo(context, videoUri)
     }
 
-    fun setStopReasonDuringDownloading(context: Context, videoUri: Uri) {
-        Timber.d("setStopReasonDuringDownloading() is called. videoUri is $videoUri")
-        DownloadService.sendSetStopReason(context, VideoDownloadService::class.java, videoUri.toString(), 1, false)
+    // Used to check if there is something downloaded before downloading a new video
+    fun checkIsAnythingDownloaded(): Boolean {
+        return videoUtil.checkIsAnythingDownloaded()
     }
-
-    // Try to send failed download to DownloadService if there are any. Else download normally.
-//    fun tryContinueDownloadFailedVideo(context: Context, videoUri: Uri) {
-//        Timber.d("continueDownloadFailedVideo() is called")
-//        videoUtil.tryContinueDownloadFailedVideo(context, videoUri)
-//    }
-
-
-//    fun getDownloadedItems(): ArrayList<Video> {
-//        val downloadedVideos = ArrayList<Video>()
-//        val downloadCursor: DownloadCursor = videoUtil.downloadManager.downloadIndex.getDownloads()
-//        if (downloadCursor.moveToFirst()) {
-//            do {
-//                val jsonString = Util.fromUtf8Bytes(downloadCursor.download.request.data)
-//                val jsonObject = JSONObject(jsonString)
-//                val uri = downloadCursor.download.request.uri
-//
-//                downloadedVideos.add(
-//                    Video(
-//                        url = uri.toString(),
-//                        title = jsonObject.getString("title")
-//                    )
-//                )
-//            } while (downloadCursor.moveToNext())
-//        }
-//        Timber.d("getDownloadedItems() returned $downloadedVideos")
-//        return downloadedVideos
-//    }
-
-//    fun playVideo(videoUri: Uri) {
-//        val mediaSource = videoUtil.getMediaSource(videoUri)
-//        videoUtil.exoPlayer.setMediaSource(mediaSource)
-//        videoUtil.exoPlayer.prepare()
-//    }
-
-    fun clearAllDownloadedVideos(context: Context) {
+    // All previous downloads must be cleared before adding a new one
+    fun clearAllDownloads(context: Context) {
         DownloadService.sendRemoveAllDownloads(context, VideoDownloadService::class.java, false)
     }
 
-    fun pauseDownloading(context: Context, videoUri: Uri) {
-        //videoUri.toString()
-        DownloadService.sendSetStopReason(context, VideoDownloadService::class.java, null, 1, false)
-        //DownloadService.sendPauseDownloads(context, VideoDownloadService::class.java, false)
+    fun pauseDownloading(context: Context) {
+        DownloadService.sendSetStopReason(
+            context, VideoDownloadService::class.java, null, 1, false
+        )
     }
 
-    fun resumeDownloading(context: Context, videoUri: Uri) {
-        DownloadService.sendSetStopReason(context, VideoDownloadService::class.java, null, 0, false)
-        //DownloadService.sendResumeDownloads(context, VideoDownloadService::class.java, false)
+    fun resumeDownloading(context: Context) {
+        DownloadService.sendSetStopReason(
+            context, VideoDownloadService::class.java, null, 0, false
+        )
     }
 
     fun downloadFailedVideo(context: Context) {
         videoUtil.downloadFailedVideo(context)
     }
 
-    fun isPlayerPrepared(): Boolean {
-        return videoUtil.isPlayerPrepared(exoPlayer)
-    }
-
-
     init {
-        Timber.d("Init is called")
-        Timber.d("In ViewModel init _currentUri.value is ${_currentUri.value}")
-
-        //_currentUri.value = savedStateHandle.get<Uri>(CURRENT_URI)?: DEFAULT_URI.toUri()
-        _currentUri.value = savedStateHandle.get<Uri>(CURRENT_URI) ?: DEFAULT_URI.toUri()
-
         exoPlayer = videoUtil.createExoPlayer()
-
-//        if (videoUtil.checkIfSomethingIsDownloaded()) {
-//            initialDownloadState = DownloadState.SomethingIsDownloaded
-//        } else if (videoUtil.checkIfSomethingIsDownloading()) {
-//            initialDownloadState = DownloadState.SomethingIsDownloading
-//        }
-
+        // Get initial download state to display the correct UI
         if (videoUtil.getDownloadState() != null) {
             initialDownloadState = when (videoUtil.getDownloadState()) {
                 Download.STATE_QUEUED -> DownloadState.Queued
@@ -262,15 +241,14 @@ class MainViewModel(
 
         _downloadState.value = initialDownloadState
 
-        videoUtil.downloadManager.addListener(downloadManagerListener)
+        exoPlayer.addListener(exoPlayerListener)
 
+        videoUtil.downloadManager.addListener(downloadManagerListener)
     }
 
     override fun onCleared() {
-        Timber.d("Release player is called")
         super.onCleared()
-        savedStateHandle[CURRENT_URI] = _currentUri.value.toString()
-        Timber.d("onCleared() is called. savedStateHandle[CURRENT_URI] is ${savedStateHandle.get<Uri>(CURRENT_URI)}")
+        Timber.d("Release player is called")
         videoUtil.releasePlayer(exoPlayer)
     }
 }

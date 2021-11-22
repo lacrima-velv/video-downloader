@@ -58,6 +58,4 @@ dependencies {
     implementation("io.insert-koin:koin-core:3.1.3")
     implementation("io.insert-koin:koin-android:3.1.3")
 
-//    implementation("androidx.navigation:navigation-fragment-ktx:2.3.5")
-//    implementation("androidx.navigation:navigation-ui-ktx:2.3.5")
 }

@@ -1,4 +1,4 @@
-package com.example.videodownloader
+package com.example.videodownloader.data
 
 import android.net.Uri
 
