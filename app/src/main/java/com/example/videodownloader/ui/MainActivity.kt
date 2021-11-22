@@ -353,6 +353,7 @@ class MainActivity : AppCompatActivity() {
         if (isEmpty) {
             showErrorEmptyInputWidgets()
         }
+        Timber.d("checkIsEmptyAutoCompleteView() returned $isEmpty")
         return isEmpty
     }
 
