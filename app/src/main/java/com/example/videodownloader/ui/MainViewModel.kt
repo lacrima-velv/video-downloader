@@ -173,7 +173,6 @@ class MainViewModel(
                 Download.STATE_COMPLETED -> {
                     Timber.d("Download state is STATE_COMPLETED")
                     _downloadState.value = DownloadState.Completed
-                    playDownloadedVideo()
                 }
                 Download.STATE_REMOVING -> {
                     Timber.d("Download state is STATE_REMOVING")

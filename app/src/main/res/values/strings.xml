@@ -37,28 +37,20 @@
         <!-- 10 MB -->
         <item>https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4</item>
         <!-- 212 MB -->
-        <item tools:ignore="TypographyDashes,Typos">https://www.ixbt.com/multimedia/
-            video-methodology/camcorders-and-others/3d/
-            3d-jvc-gs-td1-avc-high@l4.0-1920x1080-50i-aac-2ch-c.mp4</item>
+        <item tools:ignore="TypographyDashes,Typos">https://www.ixbt.com/multimedia/video-methodology/camcorders-and-others/3d/3d-jvc-gs-td1-avc-high@l4.0-1920x1080-50i-aac-2ch-c.mp4</item>
         <!-- 55 MB -->
-        <item tools:ignore="TypographyDashes">https://www.ixbt.com/multimedia/video-methodology/
-            formats/standard/h.264-1920x1080-24fps-aac.mkv</item>
+        <item tools:ignore="TypographyDashes">https://www.ixbt.com/multimedia/video-methodology/formats/standard/h.264-1920x1080-24fps-aac.mkv</item>
         <!-- 37 MB -->
         <item>https://filesamples.com/samples/video/3gp/sample_1920x1080.3gp</item>
         <!-- >1 MB -->
-        <item>https://evtesteventsdata.blob.core.windows.net/
-            app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/broken_video.mp4</item>
+        <item>https://evtesteventsdata.blob.core.windows.net/app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/broken_video.mp4</item>
         <!-- 28.5 MB -->
-        <item>https://evtesteventsdata.blob.core.windows.net/
-            app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/iphone11pro.mp4</item>
+        <item>https://evtesteventsdata.blob.core.windows.net/app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/iphone11pro.mp4</item>
         <!-- 28.5 MB -->
-        <item>http://evtesteventsdata.blob.core.windows.net/
-            app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/iphone11pro.mp4</item>
+        <item>http://evtesteventsdata.blob.core.windows.net/app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/iphone11pro.mp4</item>
         <!-- 131 MB -->
-        <item>https://evtesteventsdata.blob.core.windows.net/
-            app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/video.avi</item>
+        <item>https://evtesteventsdata.blob.core.windows.net/app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/video.avi</item>
         <!-- 6.7 MB -->
-        <item>https://evtesteventsdata.blob.core.windows.net/
-            app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/Stephanie Mabey - The Zombie Song.mp3</item>
+        <item>https://evtesteventsdata.blob.core.windows.net/app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/Stephanie Mabey - The Zombie Song.mp3</item>
     </string-array>
 </resources>
