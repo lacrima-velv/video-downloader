@@ -1,10 +1,7 @@
 package com.example.videodownloader.service
 
 import android.app.Notification
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import android.os.Build
 import com.example.videodownloader.R
 import com.example.videodownloader.videoutil.VideoUtil
 import com.google.android.exoplayer2.offline.Download
@@ -56,7 +53,7 @@ class VideoDownloadService: DownloadService(
         notMetRequirements: Int
     ): Notification {
         return notificationHelper.buildProgressNotification(
-            this, R.drawable.ic_outline_cloud_download_24, null,
+            context.applicationContext, R.drawable.ic_outline_cloud_download_24, null,
             getString(R.string.channel_description), downloads, notMetRequirements
         )
     }
