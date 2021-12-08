@@ -108,6 +108,10 @@ class MainViewModel(
         videoUtil.pauseVideo(exoPlayer)
     }
 
+    fun unpausePlayer() {
+        videoUtil.unpauseVideo(exoPlayer)
+    }
+
     fun preparePlayer() {
         videoUtil.preparePlayer(exoPlayer)
     }

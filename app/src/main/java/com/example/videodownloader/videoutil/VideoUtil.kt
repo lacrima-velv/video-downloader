@@ -242,6 +242,10 @@ class VideoUtil(val context: Context): KoinComponent {
         exoPlayer.playWhenReady = false
     }
 
+    fun unpauseVideo(exoPlayer: ExoPlayer) {
+        exoPlayer.playWhenReady = true
+    }
+
     // Used to play only completely downloaded video
     fun getCompletelyDownloadedItems(): ArrayList<Video> {
         val downloadedVideos = ArrayList<Video>()

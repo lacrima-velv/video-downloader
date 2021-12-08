@@ -39,6 +39,7 @@ import timber.log.Timber
 
 const val STATE_RESUME_POSITION = "resumePosition"
 const val STATE_PLAYER_PLAYING = "isPlayerPlaying"
+const val USER_TAPPED_PAUSE = "pausedByUser"
 /*
 Current max video size is 200 MB. If it exceeds the limit,
 an error is displayed during downloading and downloading is stopped.
@@ -57,6 +58,7 @@ class MainActivity : AppCompatActivity() {
     // Used for restoring player state during configuration changes
     private var playbackPosition: Long = 0
     private var isPlayerPlaying = true
+    private var userTappedPause = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -131,6 +133,7 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState != null) {
             playbackPosition = savedInstanceState.getLong(STATE_RESUME_POSITION)
             isPlayerPlaying = savedInstanceState.getBoolean(STATE_PLAYER_PLAYING)
+            userTappedPause = savedInstanceState.getBoolean(USER_TAPPED_PAUSE)
         }
 
         constraints = ConstraintSet()
@@ -203,8 +206,10 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         // Used for pausing/un-pausing video playback
-        if (!isPlayerPlaying) {
+        if (!isPlayerPlaying && userTappedPause) {
             mainViewModel.pausePlayer()
+        } else if (!isPlayerPlaying && !userTappedPause){
+            mainViewModel.unpausePlayer()
         }
     }
 
@@ -331,6 +336,21 @@ class MainActivity : AppCompatActivity() {
 
         fullscreenButton = controller.findViewById(R.id.exo_fullscreen_button)
         fullscreenToolbar = controller.findViewById(R.id.toolbar_fullscreen)
+        val pausePlayButton = controller.findViewById<ImageButton>(com.google.android.exoplayer2.ui.R.id.exo_pause)
+
+        pausePlayButton.setOnClickListener {
+            mainViewModel.pausePlayer()
+            userTappedPause = true
+            Timber.d("User tapped pause/play button")
+        }
+
+        val playButton = controller.findViewById<ImageButton>(com.google.android.exoplayer2.ui.R.id.exo_play)
+
+        playButton.setOnClickListener {
+            mainViewModel.unpausePlayer()
+            userTappedPause = false
+            Timber.d("User unpaused")
+        }
 
         setSupportActionBar(fullscreenToolbar)
 
@@ -421,6 +441,7 @@ class MainActivity : AppCompatActivity() {
         if (binding.inputUri.isFocused) {
             binding.inputUri.clearFocus()
         }
+        mainViewModel.pausePlayer()
     }
 
     private fun openPlayerInFullscreen() {
@@ -534,6 +555,7 @@ class MainActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
         outState.putLong(STATE_RESUME_POSITION, mainViewModel.getPlaybackPosition())
         outState.putBoolean(STATE_PLAYER_PLAYING, mainViewModel.isPlayerPlaying())
+        outState.putBoolean(USER_TAPPED_PAUSE, userTappedPause)
     }
 
     private fun showDownloadProgress() {
