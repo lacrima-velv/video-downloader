@@ -44,13 +44,7 @@
         <item>https://filesamples.com/samples/video/3gp/sample_1920x1080.3gp</item>
         <!-- >1 MB -->
         <item>https://evtesteventsdata.blob.core.windows.net/app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/broken_video.mp4</item>
-        <!-- 28.5 MB -->
-        <item>https://evtesteventsdata.blob.core.windows.net/app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/iphone11pro.mp4</item>
-        <!-- 28.5 MB -->
-        <item>http://evtesteventsdata.blob.core.windows.net/app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/iphone11pro.mp4</item>
-        <!-- 131 MB -->
-        <item>https://evtesteventsdata.blob.core.windows.net/app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/video.avi</item>
         <!-- 6.7 MB -->
-        <item>https://evtesteventsdata.blob.core.windows.net/app-2c678f1e-338d-4c7e-9bbc-68801fa8c392/Stephanie Mabey - The Zombie Song.mp3</item>
+        <item>"https://firebasestorage.googleapis.com/v0/b/audio-player-8dd5e.appspot.com/o/Derek%20Clegg%20-%20C'est%20La%20Vie.mp3?alt=media&amp;token=170efe0a-19b8-4a75-a7b7-622b6a1acd64"</item>
     </string-array>
 </resources>
